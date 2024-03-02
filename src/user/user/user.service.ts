@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -34,6 +34,24 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+    return user;
+  }
+
+  async login(email: string, password: string): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: { email: email },
+    });
+  
+    if (!user) {
+      return null; // User not found
+    }
+  
+    const passwordMatch = await bcrypt.compare(password, user.password);
+  
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+  
     return user;
   }
 }
