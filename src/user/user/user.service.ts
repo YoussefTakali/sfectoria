@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException, UnauthorizedException,Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
+import { Employees } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async addUser(data: User): Promise<User> {
-    return this.prisma.user.create({ data });
+  async addUser(data: Employees): Promise<Employees> {
+    return this.prisma.employees.create({ data });
   }
 
   async hashPassword(password: string): Promise<string> {
@@ -16,32 +16,32 @@ export class UserService {
     return bcrypt.hash(password, saltRounds);
   }
 
-  async updateUser(id: string, data: User): Promise<User> {
-    const user = await this.prisma.user.update({
-      where: { id },
+  async updateUser(user_id: string, data: Employees): Promise<Employees> {
+    const user = await this.prisma.employees.update({
+      where: { user_id },
       data,
     });
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`User with ID ${user_id} not found`);
     }
     return user;
   }
 
-  async removeUser(id: string): Promise<User> {
-    const user = await this.prisma.user.delete({
-      where: { id },
+  async removeUser(user_id: string): Promise<Employees> {
+    const user = await this.prisma.employees.delete({
+      where: { user_id },
     });
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`User with ID ${user_id} not found`);
     }
     return user;
   }
-  async getUsersByName(firstName: string, lastName: string): Promise<User[]> {
-    const users = await this.prisma.user.findMany({
+  async getUsersByName(firstName: string, lastName: string): Promise<Employees[]> {
+    const users = await this.prisma.employees.findMany({
       where: {
         OR: [
-          { firstName: { equals: firstName } },
-          { lastName: { equals: lastName } },
+          { first_name: { equals: firstName } },
+          { last_name: { equals: lastName } },
         ],
       },
     });
@@ -51,8 +51,8 @@ export class UserService {
     return users;
   }
   
-  async login(email: string, password: string): Promise<User | null> {
-    const user = await this.prisma.user.findFirst({
+  async login(email: string, password: string): Promise<Employees | null> {
+    const user = await this.prisma.employees.findFirst({
       where: { email: email },
     });
   
