@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException,Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -36,14 +36,28 @@ export class UserService {
     }
     return user;
   }
-
+  async getUsersByName(firstName: string, lastName: string): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          { firstName: { equals: firstName } },
+          { lastName: { equals: lastName } },
+        ],
+      },
+    });
+    if (!users || users.length === 0) {
+      throw new NotFoundException(`No users found with name ${firstName} ${lastName}`);
+    }
+    return users;
+  }
+  
   async login(email: string, password: string): Promise<User | null> {
     const user = await this.prisma.user.findFirst({
       where: { email: email },
     });
   
     if (!user) {
-      return null; // User not found
+      return null;
     }
   
     const passwordMatch = await bcrypt.compare(password, user.password);
