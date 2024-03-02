@@ -63,8 +63,8 @@ model Employees {
   user_id      String   @id @default(uuid())
   department   Departments @relation(fields: [department_id], references: [department_id])
   department_id String
-  first_name   String
   last_name    String
+  first_name   String
   phone_number Int
   birthday     DateTime
   gender       String
