@@ -50,22 +50,5 @@ export class UserService {
     }
     return users;
   }
-  
-  async login(email: string, password: string): Promise<Employees | null> {
-    const user = await this.prisma.employees.findFirst({
-      where: { email: email },
-    });
-  
-    if (!user) {
-      return null;
-    }
-  
-    const passwordMatch = await bcrypt.compare(password, user.password);
-  
-    if (!passwordMatch) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-  
-    return user;
-  }
+
 }
